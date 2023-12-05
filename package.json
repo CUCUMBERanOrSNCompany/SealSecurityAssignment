@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "tough-cookie": "^2.5.0"
+  }
+}
