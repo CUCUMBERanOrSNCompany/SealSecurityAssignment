@@ -31,16 +31,16 @@ CookieJar is an object for storing cookies.
 # The Assignment:
 
 # The vulnerability:
-According to the description of the vulnerability, it arises from the way Tough-Cookie initializes Cookies. Since Cookies are objects, they are theoretically at least, be vulnerable to Prototype Pollution.
+According to the [description of the vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2023-26136), it arises from the way Tough-Cookie initializes Cookies. Since Cookies are objects, they are theoretically at least, be vulnerable to Prototype Pollution.
 
 # The Risks:
 By being able to temper with objects and particularly with cookies, via the object's prototype, the attacker can potentially access unauthorized data, execute remote code, cause a denial of service, hijack the session if the website relies on cookies for managing the session, and extracting sensitive data from the cookies themselves.
 
 # The Patch:
-The patch was made at the file: memstore.js. According to the issue tracking as well as to the patch introduced at version 4.1.3, in order to patch the vulnerability, we need store the cookies in a map or create the this.idx object. By creating this.idx using: this.idx = Object.create(null); Instead of this.idx = {}, we practice my suggestion on how to prevent Prototype Pollution at the introduction, by inheriting from a null prototype, and cut the prototype chain.
+[The patch](https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/commit/21b9bba6cbf15dea862ed25a49be8ce38f3e7965) was made at the file: memstore.js. According to the [issue tracking](https://github.com/salesforce/tough-cookie/issues/282) as well as to the [patch](https://github.com/salesforce/tough-cookie/commit/12d474791bb856004e858fdb1c47b7608d09cf6e) introduced at version 4.1.3, in order to patch the vulnerability, we need store the cookies in a map or create the [this.idx](https://stackoverflow.com/questions/52489208/what-does-idx-mean-in-idx-js) object. By creating this.idx using: this.idx = Object.create(null); Instead of this.idx = {}, we practice my suggestion on how to prevent Prototype Pollution at the introduction, by inheriting from a null prototype, and cut the prototype chain.
 
 # Testing the vulnerability (index.js):
-Snyk had published a Proof of Concept (PoC) for the discussed vulnerability. I built index.js upon it. Wrapped it in a try-catch logic to capture exceptions if they arise, added additional output to keep track of the tests progress and ended up with the required output (e.g. "EXPLOITED SUCCESSFULLY" or "EXPLOITED FAILED").
+Snyk had published a [Proof of Concept (PoC)](https://security.snyk.io/vuln/SNYK-JS-TOUGHCOOKIE-5672873) for the discussed vulnerability. I built index.js upon it. Wrapped it in a try-catch logic to capture exceptions if they arise, added additional output to keep track of the tests progress and ended up with the required output (e.g. "EXPLOITED SUCCESSFULLY" or "EXPLOITED FAILED").
 When running the command: 
 npm install tough-cookie@2.5.0 && node index.js
 We're getting the following output:
