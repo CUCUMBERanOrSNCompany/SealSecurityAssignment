@@ -18,7 +18,7 @@ As we can see, we have two users: admin1 and user1. admin1 object has a Boolean 
 
 <img width="249" alt="image" src="https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/assets/70776104/c99f284e-13c0-401d-b58f-7809029f50dc">
 
-It is also worth mentioning that the prototype is an object by itself, which in turn inherits properties and methods from its prototype, those creating a prototype chain. The chain ends with a null prototype, therefore a reasonable approach to prevent prototype pollution is to make the object we are working with, to explicitly inherit from a null prototype.
+It is also worth mentioning that the prototype is an object by itself, which in turn inherits properties and methods from its prototype, those creating a [prototype chain](https://fireship.io/courses/js/102-prototype-chain/). The chain ends with a null prototype, therefore a reasonable approach to prevent prototype pollution is to make the object we are working with, to explicitly inherit from a null prototype.
 
 # What are cookies?
 Cookies (often known as internet cookies) are text files with small pieces of data Ñ like a username and password Ñ that are used to identify your computer as you use a network. Specific cookies are used to identify specific users and improve their web browsing experience.
