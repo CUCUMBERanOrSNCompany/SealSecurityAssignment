@@ -15,6 +15,7 @@ JavaScript has the concept of objects, which is somewhat like dictionaries. An o
 <img width="255" alt="image" src="https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/assets/70776104/4ea7ff2e-0f50-4ae9-ad8f-180d8363f8c6">
 
 As we can see, we have two users: admin1 and user1. admin1 object has a Boolean variable: "isAdmin", which is set to true. User1 doesn't has this variable altogether. At line 7, we add the isAdmin variable to the user1's prototype, and even though it is evident from line 10 that the variable hasn't been added to the user1's object itself, the console responds positively, this time, when we check for the value of user1.isAdmin. That's because user1 is inheriting the properties of its prototype.
+
 <img width="249" alt="image" src="https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/assets/70776104/c99f284e-13c0-401d-b58f-7809029f50dc">
 
 It is also worth mentioning that the prototype is an object by itself, which in turn inherits properties and methods from its prototype, those creating a prototype chain. The chain ends with a null prototype, therefore a reasonable approach to prevent prototype pollution is to make the object we are working with, to explicitly inherit from a null prototype.
