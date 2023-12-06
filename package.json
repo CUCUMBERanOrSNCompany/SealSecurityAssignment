@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "tough-cookie": "^2.5.0"
+    "tough-cookie": "file:tough-cookie-2.5.0-PATCHED.tgz"
   }
 }
