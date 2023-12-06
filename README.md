@@ -44,11 +44,13 @@ Snyk had published a Proof of Concept (PoC) for the discussed vulnerability. I b
 When running the command: 
 npm install tough-cookie@2.5.0 && node index.js
 We're getting the following output:
+
 <img width="501" alt="image" src="https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/assets/70776104/6a268bdc-275e-4c34-8248-e1bef2fda700">
 
 When running the command:
 npm install ./tough-cookie-2.5.0-PATCHED.tgz && node index.js
 We're getting the following output:
+
 <img width="468" alt="image" src="https://github.com/CUCUMBERanOrSNCompany/SealSecurityAssignment/assets/70776104/5d63df2d-1d05-4659-9b7e-ca3bffccb7c9">
 
 At both scenarios (Running with the published 2.5.0 version and running with my patched version), we managed to set up both the normal cookie as well as the exploited cookie, but at the patched version, we failed to access the exploited cookie.
